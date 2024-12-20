@@ -1,5 +1,7 @@
 # horizonmoose
 
+developed by hablethedev
+
 half-forked off of Legitidev's bot
 
 
