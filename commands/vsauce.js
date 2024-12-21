@@ -16,11 +16,17 @@ module.exports = {
 			return;
 		}
 
-		// i still don't understand how random works ngl
 		const randomVideo = mp4Files[Math.floor(Math.random() * mp4Files.length)];
 		const videoPath = path.join(folderPath, randomVideo);
-		await interaction.reply({
+
+		let replyContent = {
 			files: [videoPath],
-		});
+		};
+
+		if (randomVideo === 'beard.mp4') {
+			replyContent.content = 'loud btw';
+		}
+
+		await interaction.reply(replyContent);
 	},
 };
