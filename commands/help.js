@@ -11,9 +11,10 @@ module.exports = {
 			.setDescription('List of available commands:')
 			.addFields(
 				{ name: '/help', value: 'Displays this message.' },
-				{ name: '/vsauce', value: 'Sends a Vsauce intro mp4.' },
+				{ name: '/vsauce', value: 'Sends a random vsauce-related video.' },
 				{ name: '/gamble', value: 'Go gambling!' },
-				{ name: '/cats', value: 'Get a random neko from nekos.best.' }
+				{ name: '/cats', value: 'Get a random neko from nekos.best.' },
+				{ name: '/eightball', value: 'The non-magic :8ball: predicts your future.' }
 			)
 			.setFooter({ text: 'bot by hablethedev' });
 

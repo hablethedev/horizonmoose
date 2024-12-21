@@ -5,8 +5,14 @@ module.exports = {
 		.setName('gamble')
 		.setDescription('Go gambling!'),
 	async execute(interaction) {
-		const random = Math.floor(Math.random() * 101);
 		const userId = interaction.user.id;
+
+		// sorry sea
+		if (userId === '949691680796328046') {
+			await interaction.reply('please stop gambling, thank you');
+			return; 
+		}
+		const random = Math.floor(Math.random() * 101);
 
 		if (random === 1) {
 			await interaction.reply(`<@${userId}> gambled, and got: ${random}. How do you even score that bad? Seriously?`);
