@@ -18,5 +18,3 @@ funny bot that does things for fun, sometimes, very funnily
 
 
 
-
-existential crisis bot when
