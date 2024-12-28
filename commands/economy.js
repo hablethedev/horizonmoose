@@ -46,7 +46,7 @@ module.exports = {
             if (currentTime < nextAvailableTime) {
                 // discord time tags??? wow so advance
                 await interaction.reply(
-                    `You need to wait until <t:${nextAvailableTime}:R> to work again!`
+                    `You can work again  <t:${nextAvailableTime}:R>!`
                 );
                 return;
             }
