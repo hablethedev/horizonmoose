@@ -5,7 +5,6 @@ const Database = require('better-sqlite3');
 const dbPath = path.resolve(__dirname, '../databases/currency.db');
 const db = new Database(dbPath);
 
-
 const fs = require('fs');
 const dbFolder = path.dirname(dbPath);
 if (!fs.existsSync(dbFolder)) {
@@ -16,7 +15,8 @@ if (!fs.existsSync(dbFolder)) {
 db.prepare(`
 CREATE TABLE IF NOT EXISTS users (
     user_id TEXT PRIMARY KEY,
-    currency INTEGER DEFAULT 5
+    currency INTEGER DEFAULT 5,
+    last_worked INTEGER DEFAULT 0
 );`).run();
 
 module.exports = {
@@ -34,15 +34,29 @@ module.exports = {
         if (subcommand === 'work') {
             let user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(userId);
             if (!user) {
-                db.prepare('INSERT INTO users (user_id, currency) VALUES (?, 5)').run(userId);
-                user = { user_id: userId, currency: 5 };
+                db.prepare('INSERT INTO users (user_id, currency, last_worked) VALUES (?, 5, 0)').run(userId);
+                user = { user_id: userId, currency: 5, last_worked: 0 };
             }
 
-            // TODO: wait time, jobs
+            // unix??/ UNIX??/
+            const currentTime = Math.floor(Date.now() / 1000);
+            const cooldownDuration = 10 * 60; 
+            const nextAvailableTime = user.last_worked + cooldownDuration;
+
+            if (currentTime < nextAvailableTime) {
+                // discord time tags??? wow so advance
+                await interaction.reply(
+                    `You need to wait until <t:${nextAvailableTime}:R> to work again!`
+                );
+                return;
+            }
+
+
             const earned = Math.floor(Math.random() * 41) + 10;
             const newBalance = user.currency + earned;
-            db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(newBalance, userId);
 
+            db.prepare('UPDATE users SET currency = ?, last_worked = ? WHERE user_id = ?')
+                .run(newBalance, currentTime, userId);
 
             await interaction.reply(
                 `You worked hard and earned ${earned} currency! You now have ${newBalance} currency.`
