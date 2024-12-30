@@ -15,7 +15,7 @@ module.exports = {
 
 			if (!isInBotSpam) {
 				await interaction.reply('Go to bot-spam in legitidevs, you have been banned from gambling anywhere else. <#1319649023346479144>');
-				console.log(interaction.channel.id)
+				console.log(interaction.channel.id);
 				return; 
 			}
 		}
