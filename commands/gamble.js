@@ -10,11 +10,12 @@ module.exports = {
 		const member = interaction.guild.members.cache.get(userId);
 
 		// sorry sea
-		if (userId === '949691680796328046') {
+		if (userId === '949691680796328046' || userId === '1113284520737771621') {
 			const isInBotSpam = interaction.channel.id == botSpamChannelId;
 
 			if (!isInBotSpam) {
 				await interaction.reply('Go to bot-spam in legitidevs, you have been banned from gambling anywhere else. <#1319649023346479144>');
+				console.log(interaction.channel.id)
 				return; 
 			}
 		}
