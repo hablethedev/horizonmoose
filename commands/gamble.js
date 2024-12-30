@@ -11,7 +11,7 @@ module.exports = {
 
 		// sorry sea
 		if (userId === '949691680796328046') {
-			const isInBotSpam = member.channel.id == botSpamChannelId;
+			const isInBotSpam = interaction.channel.id == botSpamChannelId;
 
 			if (!isInBotSpam) {
 				await interaction.reply('Go to bot-spam in legitidevs, you have been banned from gambling anywhere else. <#1319649023346479144>');
