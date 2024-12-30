@@ -6,12 +6,12 @@ module.exports = {
 		.setDescription('Go gambling!'),
 	async execute(interaction) {
 		const userId = interaction.user.id;
-		const botSpamChannelId = '1319649023346479144'; // The ID of the bot-spam channel
+		const botSpamChannelId = '1319649023346479144'; // gambling
 		const member = interaction.guild.members.cache.get(userId);
 
 		// sorry sea
 		if (userId === '949691680796328046') {
-			const isInBotSpam = member && member.voice.channel && member.voice.channel.id === botSpamChannelId;
+			const isInBotSpam = member.channel.id == botSpamChannelId;
 
 			if (!isInBotSpam) {
 				await interaction.reply('Go to bot-spam in legitidevs, you have been banned from gambling anywhere else. <#1319649023346479144>');
