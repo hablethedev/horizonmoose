@@ -30,9 +30,9 @@ module.exports = {
             subcommand
                 .setName('modifycurrency')
                 .setDescription('Modify a user\'s currency')
-                .addStringOption(option =>
-                    option.setName('username')
-                        .setDescription('The username#discriminator of the user to modify')
+                .addUserOption(option =>
+                    option.setName('user')
+                        .setDescription('The user to modify')
                         .setRequired(true))
                 .addIntegerOption(option =>
                     option.setName('amount')
@@ -77,47 +77,21 @@ module.exports = {
                 return;
             }
 
-            const usernameWithDiscriminator = interaction.options.getString('username');
+            const targetUser = interaction.options.getUser('user');
             const amount = interaction.options.getInteger('amount');
 
-            console.log(`DEBUG: Searching for user ${usernameWithDiscriminator}`);
+            console.log(`DEBUG: Modifying currency for user ${targetUser.tag}`);
 
-            try {
-                if (!usernameWithDiscriminator || !usernameWithDiscriminator.includes('#')) {
-                    await interaction.reply('Please provide a valid username#discriminator.');
-                    return;
-                }
-
-                const [username, discriminator] = usernameWithDiscriminator.split('#');
-                
-                const targetUser = interaction.guild.members.cache.find(
-                    member => member.user.username === username && member.user.discriminator === discriminator
-                );
-
-                if (!targetUser) {
-                    console.log(`DEBUG: User ${usernameWithDiscriminator} not found.`);
-                    await interaction.reply('User not found. Please provide a valid username#discriminator.');
-                    return;
-                }
-
-                const targetUserId = targetUser.id;
-
-                console.log(`DEBUG: Found user ${targetUserId} -> ${targetUser.user.tag}`);
-
-                let user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(targetUserId);
-                if (!user) {
-                    db.prepare('INSERT INTO users (user_id, currency) VALUES (?, ?)').run(targetUserId, amount);
-                    console.log(`DEBUG: Inserted new user ${targetUserId} with currency ${amount}`);
-                } else {
-                    db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(amount, targetUserId);
-                    console.log(`DEBUG: Updated user ${targetUserId} to currency ${amount}`);
-                }
-
-                await interaction.reply(`User ${targetUserId} (${targetUser.user.tag}) now has ${amount} currency.`);
-            } catch (error) {
-                console.error(`DEBUG: Error fetching user - ${error}`);
-                await interaction.reply('An error occurred while fetching the user. Please try again.');
+            let user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(targetUser.id);
+            if (!user) {
+                db.prepare('INSERT INTO users (user_id, currency) VALUES (?, ?)').run(targetUser.id, amount);
+                console.log(`DEBUG: Inserted new user ${targetUser.id} with currency ${amount}`);
+            } else {
+                db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(amount, targetUser.id);
+                console.log(`DEBUG: Updated user ${targetUser.id} to currency ${amount}`);
             }
+
+            await interaction.reply(`User ${targetUser.tag} now has ${amount} currency.`);
         }
     },
 };
