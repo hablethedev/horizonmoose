@@ -83,8 +83,16 @@ module.exports = {
             console.log(`DEBUG: Searching for user ${usernameWithDiscriminator}`);
 
             try {
-                await interaction.guild.members.fetch(); // Ensure cache is up-to-date
-                const targetUser = interaction.guild.members.cache.find(member => member.user.tag === usernameWithDiscriminator);
+                if (!usernameWithDiscriminator || !usernameWithDiscriminator.includes('#')) {
+                    await interaction.reply('Please provide a valid username#discriminator.');
+                    return;
+                }
+
+                const [username, discriminator] = usernameWithDiscriminator.split('#');
+                
+                const targetUser = interaction.guild.members.cache.find(
+                    member => member.user.username === username && member.user.discriminator === discriminator
+                );
 
                 if (!targetUser) {
                     console.log(`DEBUG: User ${usernameWithDiscriminator} not found.`);
