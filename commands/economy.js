@@ -31,8 +31,8 @@ module.exports = {
                 .setName('modifycurrency')
                 .setDescription('Modify a user\'s currency')
                 .addStringOption(option =>
-                    option.setName('userid')
-                        .setDescription('The ID of the user to modify')
+                    option.setName('username')
+                        .setDescription('The username of the user to modify')
                         .setRequired(true))
                 .addIntegerOption(option =>
                     option.setName('amount')
@@ -77,8 +77,17 @@ module.exports = {
                 return;
             }
 
-            const targetUserId = interaction.options.getString('userid');
+            const username = interaction.options.getString('username');
             const amount = interaction.options.getInteger('amount');
+
+            const targetUser = interaction.guild.members.cache.find(member => member.user.username === username);
+
+            if (!targetUser) {
+                await interaction.reply('User not found. Please provide a valid username.');
+                return;
+            }
+
+            const targetUserId = targetUser.id;
 
             let user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(targetUserId);
             if (!user) {
@@ -87,7 +96,7 @@ module.exports = {
                 db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(amount, targetUserId);
             }
 
-            await interaction.reply(`User ${targetUserId} now has ${amount} currency.`);
+            await interaction.reply(`User ${targetUserId} (${targetUser.user.username}) now has ${amount} currency.`);
         }
     },
 };
