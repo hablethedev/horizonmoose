@@ -27,6 +27,10 @@ module.exports = {
                 .setName('work')
                 .setDescription('Go work and earn money!'))
         .addSubcommand(subcommand =>
+			 subcommand
+				.setName('currency')
+				.setDescription('How much currency do you have?'))
+        .addSubcommand(subcommand =>
             subcommand
                 .setName('modifycurrency')
                 .setDescription('Modify a user\'s currency')
@@ -92,6 +96,9 @@ module.exports = {
             }
 
             await interaction.reply(`User ${targetUser.tag} now has ${amount} currency.`);
+        } else if (subcommand === 'currency') {
+        	let user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(userId);
+        	await interaction.reply(`You have ${user.currency}`);
         }
     },
 };
