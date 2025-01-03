@@ -77,7 +77,7 @@ module.exports = {
 
         await interaction.reply({
             content: `You gambled and earned ${random} currency! You now have ${updatedBalance} currency.`,
-            ephemeral: true
+            ephemeral: false
         });
     },
 };
