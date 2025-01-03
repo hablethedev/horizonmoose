@@ -1,42 +1,44 @@
 const { SlashCommandBuilder } = require('discord.js');
+const path = require('path');
+const Database = require('better-sqlite3');
+
+const dbPath = path.resolve(__dirname, '../databases/currency.db');
+const db = new Database(dbPath);
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('gamble')
-		.setDescription('Go gambling!'),
-	async execute(interaction) {
-		const userId = interaction.user.id;
-		const botSpamChannelId = '1319649023346479144'; // gambling
-		const member = interaction.guild.members.cache.get(userId);
+    data: new SlashCommandBuilder()
+        .setName('gamble')
+        .setDescription('Spend 10 Currency to gamble!'),
+    async execute(interaction) {
+        const userId = interaction.user.id;
+        const botSpamChannelId = '1319649023346479144';
+        if (userId === '949691680796328046') {
+            if (interaction.channel.id != botSpamChannelId) {
+                await interaction.reply('Go to bot-spam in legitidevs, you have been banned from gambling anywhere else. <#1319649023346479144>');
+                console.log(interaction.channel.id);
+                return;
+            }
+        }
 
-		// sorry sea
-		if (userId === '949691680796328046') {
+        let user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(userId);
+        if (!user) {
+            db.prepare('INSERT INTO users (user_id, currency) VALUES (?, 5)').run(userId);
+            user = { user_id: userId, currency: 5 };
+        }
 
-			if (interaction.channel.id != "1319649023346479144") {
-				await interaction.reply('Go to bot-spam in legitidevs, you have been banned from gambling anywhere else. <#1319649023346479144>');
-				console.log(interaction.channel.id);
-				return; 
-			}
-		}
+        if (user.currency < 10) {
+            await interaction.reply(`You need at least 10 currency to gamble. You currently have ${user.currency} currency.`);
+            return;
+        }
 
-		const random = Math.floor(Math.random() * 101);
+        const newBalance = user.currency - 10;
+        db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(newBalance, userId);
 
-		if (random === 1) {
-			await interaction.reply(`<@${userId}> gambled, and got: ${random}. How do you even score that bad? Seriously?`);
-		} else if (random >= 2 && random <= 25) {
-			await interaction.reply(`<@${userId}> gambled, and got: ${random}. Probably the worst you can get.`);
-		} else if (random >= 26 && random <= 49) {
-			await interaction.reply(`<@${userId}> gambled, and got: ${random}. Not the best.`);
-		} else if (random === 50) {
-			await interaction.reply(`<@${userId}> gambled, and got: ${random}. Mediocre.`);
-		} else if (random >= 51 && random <= 75) {
-			await interaction.reply(`<@${userId}> gambled, and got: ${random}. Not the worst.`);
-		} else if (random >= 76 && random <= 98) {
-			await interaction.reply(`<@${userId}> gambled, and got: ${random}. Oooh. Getting close.`);
-		} else if (random === 99) {
-			await interaction.reply(`<@${userId}> gambled, had a skill issue, and got: ${random}. Haha!`);
-		} else if (random === 100) {
-			await interaction.reply(`<@${userId}> gambled, and *somehow* got: ${random}!??? THAT'S CRAZY!`);
-		}
-	},
+        const random = Math.floor(Math.random() * 41) + 10;
+        const updatedBalance = newBalance + random;
+
+        db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(updatedBalance, userId);
+
+        await interaction.reply(`You gambled and earned ${random} currency! You now have ${updatedBalance} currency.`);
+    },
 };
