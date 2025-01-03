@@ -95,7 +95,11 @@ module.exports = {
                 console.log(`DEBUG: Updated user ${targetUser.id} to currency ${amount}`);
             }
 
-            await interaction.reply(`User ${targetUser.tag} now has ${amount} currency.`);
+            await interaction.reply({
+            	content: `User ${targetUser.tag} now has ${amount} currency.`,
+            	ephemeral: true
+            	}
+            );
             
         } else if (subcommand === 'currency') {
         
