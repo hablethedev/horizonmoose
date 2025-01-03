@@ -5,21 +5,20 @@ const Database = require('better-sqlite3');
 const dbPath = path.resolve(__dirname, '../databases/currency.db');
 const db = new Database(dbPath);
 
-// Add gambleCountdown column if it doesn't exist
 db.prepare(`
-    PRAGMA foreign_keys = OFF;
     CREATE TABLE IF NOT EXISTS users (
         user_id TEXT PRIMARY KEY,
         currency INTEGER DEFAULT 5,
         gambleCountdown INTEGER
     );
-    PRAGMA foreign_keys = ON;
 `).run();
 
 const usersTableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").get();
-
-if (usersTableExists && !db.prepare("PRAGMA table_info(users)").all().find(column => column.name === 'gambleCountdown')) {
-    db.prepare("ALTER TABLE users ADD COLUMN gambleCountdown INTEGER").run();
+if (usersTableExists) {
+    const columns = db.prepare("PRAGMA table_info(users)").all();
+    if (!columns.find(column => column.name === 'gambleCountdown')) {
+        db.prepare("ALTER TABLE users ADD COLUMN gambleCountdown INTEGER").run();
+    }
 }
 
 module.exports = {
