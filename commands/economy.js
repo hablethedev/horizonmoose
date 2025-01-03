@@ -82,28 +82,34 @@ module.exports = {
 
             console.log(`DEBUG: Searching for user ${usernameWithDiscriminator}`);
 
-            const targetUser = interaction.guild.members.cache.find(member => member.user.tag === usernameWithDiscriminator);
+            try {
+                await interaction.guild.members.fetch(); // Ensure cache is up-to-date
+                const targetUser = interaction.guild.members.cache.find(member => member.user.tag === usernameWithDiscriminator);
 
-            if (!targetUser) {
-                console.log(`DEBUG: User ${usernameWithDiscriminator} not found.`);
-                await interaction.reply('User not found. Please provide a valid username#discriminator.');
-                return;
+                if (!targetUser) {
+                    console.log(`DEBUG: User ${usernameWithDiscriminator} not found.`);
+                    await interaction.reply('User not found. Please provide a valid username#discriminator.');
+                    return;
+                }
+
+                const targetUserId = targetUser.id;
+
+                console.log(`DEBUG: Found user ${targetUserId} -> ${targetUser.user.tag}`);
+
+                let user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(targetUserId);
+                if (!user) {
+                    db.prepare('INSERT INTO users (user_id, currency) VALUES (?, ?)').run(targetUserId, amount);
+                    console.log(`DEBUG: Inserted new user ${targetUserId} with currency ${amount}`);
+                } else {
+                    db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(amount, targetUserId);
+                    console.log(`DEBUG: Updated user ${targetUserId} to currency ${amount}`);
+                }
+
+                await interaction.reply(`User ${targetUserId} (${targetUser.user.tag}) now has ${amount} currency.`);
+            } catch (error) {
+                console.error(`DEBUG: Error fetching user - ${error}`);
+                await interaction.reply('An error occurred while fetching the user. Please try again.');
             }
-
-            const targetUserId = targetUser.id;
-
-            console.log(`DEBUG: Found user ${targetUserId} -> ${targetUser.user.tag}`);
-
-            let user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(targetUserId);
-            if (!user) {
-                db.prepare('INSERT INTO users (user_id, currency) VALUES (?, ?)').run(targetUserId, amount);
-                console.log(`DEBUG: Inserted new user ${targetUserId} with currency ${amount}`);
-            } else {
-                db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(amount, targetUserId);
-                console.log(`DEBUG: Updated user ${targetUserId} to currency ${amount}`);
-            }
-
-            await interaction.reply(`User ${targetUserId} (${targetUser.user.tag}) now has ${amount} currency.`);
         }
     },
 };
