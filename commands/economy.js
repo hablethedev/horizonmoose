@@ -102,7 +102,7 @@ module.exports = {
         	let user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(userId);
         	await interaction.reply({
         		content: `You have ${user.currency} currency. Try working to get some more!`,
-        		ephermeral: true,
+        		ephemeral: true
         		});
         	
         }
