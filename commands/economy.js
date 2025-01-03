@@ -11,7 +11,6 @@ if (!fs.existsSync(dbFolder)) {
     fs.mkdirSync(dbFolder, { recursive: true });
 }
 
-// we don't include the database (gitignore) so we need this too
 db.prepare(`
 CREATE TABLE IF NOT EXISTS users (
     user_id TEXT PRIMARY KEY,
@@ -22,11 +21,23 @@ CREATE TABLE IF NOT EXISTS users (
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('economy')
-        .setDescription('GET MONEY!!!')
+        .setDescription('Manage your currency')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('work')
-                .setDescription('Go work and earn money!')),
+                .setDescription('Go work and earn money!'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('modifycurrency')
+                .setDescription('Modify a user\'s currency')
+                .addStringOption(option =>
+                    option.setName('userid')
+                        .setDescription('The ID of the user to modify')
+                        .setRequired(true))
+                .addIntegerOption(option =>
+                    option.setName('amount')
+                        .setDescription('The amount to set the user\'s currency to')
+                        .setRequired(true))),
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
         const userId = interaction.user.id;
@@ -38,19 +49,16 @@ module.exports = {
                 user = { user_id: userId, currency: 5, last_worked: 0 };
             }
 
-            // unix??/ UNIX??/
             const currentTime = Math.floor(Date.now() / 1000);
-            const cooldownDuration = 10 * 60; 
+            const cooldownDuration = 10 * 60;
             const nextAvailableTime = user.last_worked + cooldownDuration;
 
             if (currentTime < nextAvailableTime) {
-                // discord time tags??? wow so advance
                 await interaction.reply(
-                    `You can work again  <t:${nextAvailableTime}:R>!`
+                    `You can work again <t:${nextAvailableTime}:R>!`
                 );
                 return;
             }
-
 
             const earned = Math.floor(Math.random() * 41) + 10;
             const newBalance = user.currency + earned;
@@ -61,8 +69,25 @@ module.exports = {
             await interaction.reply(
                 `You worked hard and earned ${earned} currency! You now have ${newBalance} currency.`
             );
-        } else {
-            await interaction.reply('how do you even-');
+        } else if (subcommand === 'modifycurrency') {
+            const adminId = '1113284520737771621';
+
+            if (userId !== adminId) {
+                await interaction.reply('You are not authorized to use this command.');
+                return;
+            }
+
+            const targetUserId = interaction.options.getString('userid');
+            const amount = interaction.options.getInteger('amount');
+
+            let user = db.prepare('SELECT * FROM users WHERE user_id = ?').get(targetUserId);
+            if (!user) {
+                db.prepare('INSERT INTO users (user_id, currency) VALUES (?, ?)').run(targetUserId, amount);
+            } else {
+                db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(amount, targetUserId);
+            }
+
+            await interaction.reply(`User ${targetUserId} now has ${amount} currency.`);
         }
-    }
+    },
 };
