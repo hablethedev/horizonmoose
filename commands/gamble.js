@@ -34,7 +34,7 @@ module.exports = {
         const newBalance = user.currency - 10;
         db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(newBalance, userId);
 
-        const random = Math.floor(Math.random() * 41) + 5;
+        const random = Math.floor(Math.random() * 21) + 0;
         const updatedBalance = newBalance + random;
 
         db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(updatedBalance, userId);
