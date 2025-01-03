@@ -54,7 +54,7 @@ module.exports = {
             }
 
             const currentTime = Math.floor(Date.now() / 1000);
-            const cooldownDuration = 10 * 60;
+            const cooldownDuration = 3 * 60;
             const nextAvailableTime = user.last_worked + cooldownDuration;
 
             if (currentTime < nextAvailableTime) {
