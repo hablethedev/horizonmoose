@@ -32,7 +32,7 @@ module.exports = {
                 .setDescription('Modify a user\'s currency')
                 .addStringOption(option =>
                     option.setName('username')
-                        .setDescription('The username of the user to modify')
+                        .setDescription('The username#discriminator of the user to modify')
                         .setRequired(true))
                 .addIntegerOption(option =>
                     option.setName('amount')
@@ -77,13 +77,13 @@ module.exports = {
                 return;
             }
 
-            const username = interaction.options.getString('username');
+            const usernameWithDiscriminator = interaction.options.getString('username');
             const amount = interaction.options.getInteger('amount');
 
-            const targetUser = interaction.guild.members.cache.find(member => member.user.username === username);
+            const targetUser = interaction.guild.members.cache.find(member => member.user.tag === usernameWithDiscriminator);
 
             if (!targetUser) {
-                await interaction.reply('User not found. Please provide a valid username.');
+                await interaction.reply('User not found. Please provide a valid username#discriminator.');
                 return;
             }
 
@@ -96,7 +96,7 @@ module.exports = {
                 db.prepare('UPDATE users SET currency = ? WHERE user_id = ?').run(amount, targetUserId);
             }
 
-            await interaction.reply(`User ${targetUserId} (${targetUser.user.username}) now has ${amount} currency.`);
+            await interaction.reply(`User ${targetUserId} (${targetUser.user.tag}) now has ${amount} currency.`);
         }
     },
 };
